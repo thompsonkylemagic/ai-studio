@@ -1,5 +1,6 @@
 name: keepalive-supabase
 # Supabase 免費專案閒置 1 週會暫停，每 3 天打一次輕量查詢保活
+# 2026-11-09 暫時改為診斷版：印出 secret 長度/前綴與完整回應，定位 401 原因後改回正式版
 on:
   schedule:
     - cron: "17 3 */3 * *"
@@ -8,9 +9,13 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase REST
+      - name: Ping Supabase REST (diagnostic)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -fsS "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -o /dev/null -w "%{http_code}\n"
+          echo "url=$SUPABASE_URL"
+          echo "key_len=${#SUPABASE_ANON_KEY} key_prefix=${SUPABASE_ANON_KEY:0:4}"
+          curl -sS -i "${SUPABASE_URL}/rest/v1/" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}"
