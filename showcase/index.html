@@ -1,1 +1,57 @@
-<!-- Placeholder — to be replaced by upload. -->
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yuuri AI Studio — 作品庫</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background: #0e1116; color: #e6e9ee; }
+  main { max-width: 860px; margin: 0 auto; padding: 40px 20px 64px; }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  p.sub { color: #9aa4b2; margin: 0 0 28px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .card { background: #161b22; border: 1px solid #262d36; border-radius: 10px; padding: 16px; }
+  .card h2 { font-size: 17px; margin: 0 0 8px; word-break: break-word; }
+  .meta { font-size: 12px; color: #9aa4b2; margin-bottom: 8px; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; border: 1px solid #3a4350; color: #c8d0da; margin-right: 6px; }
+  .notes { font-size: 13px; color: #c8d0da; line-height: 1.5; word-break: break-word; }
+  .state { color: #9aa4b2; font-size: 14px; padding: 24px 0; }
+  footer { margin-top: 40px; font-size: 12px; color: #66707d; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Yuuri AI Studio</h1>
+  <p class="sub">創作產線作品庫 — 由 Kaggle 加工、Supabase 儲存，透過 Cloudflare Worker API 即時讀取。</p>
+  <div id="app" class="state">載入作品中…</div>
+  <footer>資料來源：ai-studio-api.kyletrump888.workers.dev/works</footer>
+</main>
+<script>
+const API = "https://ai-studio-api.kyletrump888.workers.dev/works";
+const app = document.getElementById("app");
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+fetch(API)
+  .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+  .then(rows => {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      app.textContent = "作品庫目前是空的。";
+      return;
+    }
+    app.className = "grid";
+    app.innerHTML = rows.map(w => {
+      const date = w.created_at ? new Date(w.created_at).toLocaleString("zh-TW") : "";
+      return `<article class="card">
+        <h2>${esc(w.title)}</h2>
+        <div class="meta"><span class="badge">${esc(w.kind)}</span><span class="badge">${esc(w.status)}</span>${esc(w.source || "")}</div>
+        ${w.notes ? `<div class="notes">${esc(w.notes)}</div>` : ""}
+        <div class="meta" style="margin-top:10px">${esc(date)}</div>
+      </article>`;
+    }).join("");
+  })
+  .catch(err => { app.textContent = "作品載入失敗：" + err.message; });
+</script>
+</body>
+</html>
