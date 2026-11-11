@@ -1,6 +1,6 @@
 # 免費 AI 工作室進度
 
-更新：2026-11-11 00:10（Asia/Taipei）
+更新：2026-11-11 17:05（Asia/Taipei）
 
 | 服務 | 狀態 | 備註 |
 |---|---|---|
@@ -14,3 +14,9 @@
 | Cloudflare R2 | 卡住，待 Yuuri 決定 | 啟用前必須先按「Add R2 subscription to my account」開通訂閱（自動續費、超額向登記付款方式扣款），帳號目前無付款方式，依約定未點擊，bucket 未建立；是 10 家中唯一啟用前就必須綁付款方式的。要不要之後加卡開通由 Yuuri 決定 |
 | Google Colab | 已實測完成 | 2026-11-10 以 kyletrump888@gmail.com 登入確認（開啟即為登入狀態）；新建測試 notebook Untitled0.ipynb（存於 Google Drive 免費空間）；Runtime 可選免費 T4 GPU（H100、L4、A100、G4 為付費停用）；實跑 print 與 nvidia-smi 成功，確認真的分到 Tesla T4（15,360 MiB，驅動 580.82.07，CUDA 13.0）。連線時跳過一次 reCAPTCHA 已通過；未遇到配額限制或付費提示，未買 Colab Pro。定位維持手動備援 GPU |
 | Sakupa | 實測受阻：流程可用，卡在共用網路免費額度 | 2026-11-10 查證：Sakupa 沒有網頁版上傳入口，唯一發布途徑是官方 MCP 插件 @sakupa/mcp（裝在支援 MCP 的 AI 工具，npx 啟動），官網確認免費預覽 ¥0、30 天、同時最多 3 站、不需綁卡，長期方案 Water ¥200／月起。助理已在自己的環境直接接上該 MCP 實測：init 與 analyze 均通過，測試專案在 ~/workspace/ai-studio-free-stack/sakupa-test/（index.html 內容為 ai-studio test），但 deploy 被 Sakupa 雲端拒絕——免費站額度按網路計算，本環境的共用網路出口已有 3 個使用中的免費站且無一屬於本裝置，額度要等其中一站到期才釋出；未建立任何站、未產生費用、無管理憑證可備份。結論：Sakupa 須從 Yuuri 自己的電腦與網路執行才有自己的額度，屆時用同一 MCP 流程（init→analyze→deploy）即可發布，管理憑證會存在該機 ~/.sakupa/credentials 與專案 .sakupa/site.json，需備份 |
+
+## Repo 同步與展示站（2026-11-11）
+
+- GitHub repo thompsonkylemagic/ai-studio 已同步到最新：STATUS.md、worker/src/index.js（v2）、creative-pipeline/PLAN.md、kaggle/batch_test.py、showcase/index.html 五個檔案皆已上傳並核對，最新 commit 9e25f3a。
+- 展示站已於 2026-11-11 完成上線：Cloudflare Pages 專案 ai-studio-showcase，網址 https://ai-studio-showcase.pages.dev/ ，即時讀 Worker /works，三筆作品（kaggle-gpu-test、worker-test、pipeline-test）皆已驗證顯示。過程中發現 Worker 缺 CORS 標頭，已升級 Worker v3（部署版本 27925220）補上 Access-Control-Allow-Origin 與 OPTIONS 預檢，變數與 secret 未動；儀表板內的 v3 為手術式修改，與本地正本 creative-pipeline/worker-v3.js 行為相同但不逐字一致。
+- 第一件真正作品已入庫（2026-11-11）：Midnight Signal（K-pop 舞曲）經 Yuuri 確認後在 Suno 生成共 4 版（完整 V6-MINI 1:11 與 1:27、1 分鐘 PREVIEW 兩版），已寫回作品庫（id c34e5359，draft），version 1、2 連結兩首完整版 Suno 歌曲，展示站即時顯示。Suno 帳號為本次以同一 Google 帳號新建（使用者名稱 kyletrump888，免費點數，未購買方案）。
