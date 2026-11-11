@@ -16,6 +16,9 @@
   .meta { font-size: 12px; color: #9aa4b2; margin-bottom: 8px; }
   .badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11px; border: 1px solid #3a4350; color: #c8d0da; margin-right: 6px; }
   .notes { font-size: 13px; color: #c8d0da; line-height: 1.5; word-break: break-word; }
+  .listen { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .play { display: inline-block; padding: 6px 12px; border-radius: 999px; background: #1f6feb; color: #fff; font-size: 13px; text-decoration: none; }
+  .play:hover { background: #2b7bff; }
   .state { color: #9aa4b2; font-size: 14px; padding: 24px 0; }
   footer { margin-top: 40px; font-size: 12px; color: #66707d; }
 </style>
@@ -47,9 +50,27 @@ fetch(API)
         <h2>${esc(w.title)}</h2>
         <div class="meta"><span class="badge">${esc(w.kind)}</span><span class="badge">${esc(w.status)}</span>${esc(w.source || "")}</div>
         ${w.notes ? `<div class="notes">${esc(w.notes)}</div>` : ""}
+        <div class="listen" id="listen-${esc(w.id)}"></div>
         <div class="meta" style="margin-top:10px">${esc(date)}</div>
       </article>`;
     }).join("");
+    rows.forEach(w => {
+      fetch(API + "/" + w.id)
+        .then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+        .then(d => {
+          const box = document.getElementById("listen-" + w.id);
+          if (!box || !d.versions || d.versions.length === 0) return;
+          box.innerHTML = d.versions.map(v => {
+            const url = esc(v.file_url);
+            const label = `版本 ${esc(v.version)}${v.note ? " · " + esc(v.note) : ""}`;
+            if (/\.(mp3|wav|flac|m4a|ogg)(\?|$)/i.test(v.file_url || "")) {
+              return `<div style="flex-basis:100%"><div class="meta" style="margin-bottom:4px">${esc(label)}</div><audio controls preload="none" src="${url}" style="width:100%"></audio></div>`;
+            }
+            return `<a class="play" href="${url}" target="_blank" rel="noopener">▶ ${esc(label)}</a>`;
+          }).join("");
+        })
+        .catch(() => {});
+    });
   })
   .catch(err => { app.textContent = "作品載入失敗：" + err.message; });
 </script>
