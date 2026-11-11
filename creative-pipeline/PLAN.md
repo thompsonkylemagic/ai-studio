@@ -19,7 +19,7 @@
 2. Supabase 建作品庫資料表（works、versions），Worker 加 /works 讀寫端點並實測。（2026-11-10 完成：兩表已建、RLS 開、anon 全部操作 policy，測試列 pipeline-test 在庫；Worker 已升級 v2 並部署，SUPABASE_URL 與 SUPABASE_ANON_KEY 已設定，/health、GET／POST /works、GET /works/<id>、/chat 回歸實測全過。/works 目前公開可讀寫，日後可加 token 上鎖。）
 3. Kaggle 批次範本實跑一次：拿一個測試素材跑加工，成品寫回作品庫。（2026-11-10 完成：notebook ai-studio-kaggle-test 在 2 張 Tesla T4 上實跑，矩陣運算加工與測試圖產生成功，成品經 Worker API 寫回作品庫——作品 kaggle-gpu-test 與其 version 1 都已建立並回讀驗證。兩個踩坑已記錄：呼叫 Worker 必須帶自訂 User-Agent，否則被 Cloudflare 以 error 1010 擋下；POST /works 回傳的是陣列，取 id 要用 work[0]["id"]。腳本存於 ~/workspace/ai-studio-free-stack/kaggle/batch_test.py。）
 4. Simular MCP 連線測試（OAuth，需 Yuuri 授權），通過後才把平台操作排進產線。（2026-11-11 完成：Yuuri 已完成 OAuth 授權，連線註冊為自訂連接器 custom.simular，實測可列出工具並讀到 box「main」；目前 client 只開放唯讀操作，之後產線要用開機、shell、瀏覽器或桌面操作時，再逐項經 Yuuri 授權加開。）
-5. 展示站（Cloudflare Pages）與 Sakupa 預覽流程，排在有第一批成品之後。
+5. 展示站（Cloudflare Pages）與 Sakupa 預覽流程，排在有第一批成品之後。（展示站已於 2026-11-11 完成：Pages 專案 ai-studio-showcase 上線於 https://ai-studio-showcase.pages.dev/ ，即時讀 Worker /works 並已驗證三筆作品都顯示。部署時發現 Worker 回應缺 CORS 標頭、瀏覽器擋下跨來源讀取，已將 Worker 升級 v3（部署版本 27925220）補上 CORS 與 OPTIONS 處理，變數與 secret 未動；部署在儀表板內的 v3 是手術式修改，與本地正本 worker-v3.js 行為相同但不逐字一致，之後改 Worker 以本地檔案為準。Sakupa 預覽仍維持從 Yuuri 本機執行，需要時再做。）
 
 ## 限制
 
