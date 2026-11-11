@@ -1,7 +1,13 @@
-// Cloudflare Workers 入口 v2：健康檢查 + OpenRouter 轉發 + 創作產線作品庫（Supabase）
+// Cloudflare Workers 入口 v3：健康檢查 + OpenRouter 轉發 + 創作產線作品庫（Supabase）+ CORS
+// v3 與 v2 的唯一差別：所有回應加上 CORS 標頭並處理 OPTIONS 預檢，讓展示站（pages.dev）能跨來源讀取。
 // 需要的綁定：OPENROUTER_API_KEY（secret）、SUPABASE_URL（變數）、SUPABASE_ANON_KEY（secret，publishable key）
-export default {
-  async fetch(request, env) {
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+async function handle(request, env) {
     const url = new URL(request.url);
     const path = url.pathname;
 
@@ -92,5 +98,16 @@ export default {
     }
 
     return new Response("not found", { status: 404 });
+}
+
+export default {
+  async fetch(request, env) {
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: CORS });
+    }
+    const res = await handle(request, env);
+    const out = new Response(res.body, res);
+    for (const [k, v] of Object.entries(CORS)) out.headers.set(k, v);
+    return out;
   },
 };
